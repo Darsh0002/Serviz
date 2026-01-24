@@ -28,7 +28,7 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
 
     public User getUserByEmail(String email) throws Exception {
-        return userRepo.findByEmail(email).orElseThrow(() -> new Exception("User Not Found"));
+        return userRepo.findByEmail(email).orElse(null);
     }
 
     public User createUser(UserSignUpReq req) {

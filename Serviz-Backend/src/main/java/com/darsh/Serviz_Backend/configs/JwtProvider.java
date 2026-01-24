@@ -18,6 +18,7 @@ public class JwtProvider {
                 .stream()
                 .findFirst()
                 .map(GrantedAuthority::getAuthority)
+                .map(r -> r.replace("ROLE_", ""))
                 .orElse("");
 
         return Jwts.builder()

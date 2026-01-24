@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.crypto.SecretKey;
@@ -20,25 +21,57 @@ import java.io.IOException;
 import java.util.List;
 
 public class JwtTokenValidator extends OncePerRequestFilter {
+
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws ServletException, IOException {
+
         String jwt = request.getHeader("Authorization");
+
         if (jwt != null && jwt.startsWith("Bearer ")) {
             jwt = jwt.substring(7);
             try {
-                SecretKey key = Keys.hmacShaKeyFor("fhbejfbkernfvjrngjkungjknsvjusgntgbjkensamfbrvjkhjksrng,rk".getBytes());
-                Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(jwt).getBody();
+                SecretKey key = Keys.hmacShaKeyFor(
+                        "fhbejfbkernfvjrngjkungjknsvjusgntgbjkensamfbrvjkhjksrng,rk"
+                                .getBytes()
+                );
 
-                String email = String.valueOf(claims.get("email"));
-                String role = String.valueOf(claims.get("role"));
-                List<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList("ROLE_" + role);
+                Claims claims = Jwts.parserBuilder()
+                        .setSigningKey(key)
+                        .build()
+                        .parseClaimsJws(jwt)
+                        .getBody();
 
-                Authentication authentication = new UsernamePasswordAuthenticationToken(email, null, authorities);
+                String email = claims.get("email", String.class);
+                String role = claims.get("role", String.class);
+
+                List<GrantedAuthority> authorities =
+                        AuthorityUtils.createAuthorityList("ROLE_" + role);
+
+                UserDetails userDetails =
+                        new org.springframework.security.core.userdetails.User(
+                                email,
+                                "",
+                                authorities
+                        );
+
+                Authentication authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                authorities
+                        );
+
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (Exception e) {
                 throw new BadCredentialsException("Invalid Token");
             }
         }
+
         filterChain.doFilter(request, response);
     }
 }
+
