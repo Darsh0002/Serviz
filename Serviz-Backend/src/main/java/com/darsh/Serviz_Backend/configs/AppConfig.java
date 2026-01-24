@@ -28,20 +28,19 @@ public class AppConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
 
-                        // Public APIs
                         .requestMatchers(
                                 "/api/auth/**"
                         ).permitAll()
 
-                        // USER APIs
+                        .requestMatchers("/api/u/**")
+                        .hasAnyRole("USER", "PROVIDER")
+
                         .requestMatchers("/api/user/**")
                         .hasRole("USER")
 
-                        // PROVIDER APIs
                         .requestMatchers("/api/provider/**")
                         .hasRole("PROVIDER")
 
-                        // Any other API
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(
@@ -53,7 +52,6 @@ public class AppConfig {
 
         return http.build();
     }
-
 
     public CorsConfigurationSource corsConfigurationSource() {
         return new CorsConfigurationSource() {

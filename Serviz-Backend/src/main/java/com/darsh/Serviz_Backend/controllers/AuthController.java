@@ -33,7 +33,7 @@ public class AuthController {
         }
 
         User savedUser = userService.createUser(req);
-        return ResponseEntity.ok("User Sign Up Successfull");
+        return ResponseEntity.ok("User Sign Up Successful");
     }
 
     @PostMapping("/signup/provider")
@@ -46,7 +46,6 @@ public class AuthController {
         User savedUser = userService.createProvider(req);
         return ResponseEntity.ok("Provider Sign Up Successfull");
     }
-
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> loginUser(@RequestBody LoginRequest req) {
