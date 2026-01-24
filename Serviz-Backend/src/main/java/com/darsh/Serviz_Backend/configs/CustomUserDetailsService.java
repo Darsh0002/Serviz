@@ -3,6 +3,7 @@ package com.darsh.Serviz_Backend.configs;
 import com.darsh.Serviz_Backend.modals.User;
 import com.darsh.Serviz_Backend.repositories.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,7 +25,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         User user = userRepo.findByEmail(email)
                 .orElseThrow(() ->
-                        new UsernameNotFoundException("User not found")
+                        new BadCredentialsException("User not found")
                 );
 
         List<GrantedAuthority> authorities = List.of(
