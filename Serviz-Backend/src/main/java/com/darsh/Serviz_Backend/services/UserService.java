@@ -27,8 +27,8 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public User getUserByEmail(String email) {
-        return userRepo.findByEmail(email).orElse(null);
+    public User getUserByEmail(String email) throws Exception {
+        return userRepo.findByEmail(email).orElseThrow(() -> new Exception("User Not Found"));
     }
 
     public User createUser(UserSignUpReq req) {

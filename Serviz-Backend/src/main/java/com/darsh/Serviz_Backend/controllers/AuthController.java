@@ -26,7 +26,7 @@ public class AuthController {
     private UserService userService;
 
     @PostMapping("/signup/user")
-    public ResponseEntity<String> SignUpUser(@RequestBody UserSignUpReq req) {
+    public ResponseEntity<String> SignUpUser(@RequestBody UserSignUpReq req) throws Exception {
         User existingUser = userService.getUserByEmail(req.getEmail());
         if (existingUser != null) {
             return new ResponseEntity<>("Email Already Exists", HttpStatus.BAD_REQUEST);
@@ -37,7 +37,7 @@ public class AuthController {
     }
 
     @PostMapping("/signup/provider")
-    public ResponseEntity<String> SignUpProvider(@RequestBody ProviderSignUpReq req) {
+    public ResponseEntity<String> SignUpProvider(@RequestBody ProviderSignUpReq req) throws Exception {
         User existingUser = userService.getUserByEmail(req.getEmail());
         if (existingUser != null) {
             return new ResponseEntity<>("Email Already Exists", HttpStatus.BAD_REQUEST);
