@@ -9,6 +9,7 @@ import UserDashboard from "./pages/UserDashboard";
 import ProviderDashboard from "./pages/ProviderDashboard";
 import Unauthorized from "./pages/Unauthorized";
 import LandingPage from "./pages/LandingPage";
+import SignUpPage from "./pages/SignUpPage";
 
 const App = () => {
   return (
@@ -18,6 +19,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<SignUpPage />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
 
         {/* USER ROUTES */}

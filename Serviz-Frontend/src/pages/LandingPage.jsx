@@ -8,9 +8,22 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useNavigate } from "react-router";
+import { useContext, useEffect } from "react";
+import { AppContext } from "../context/AppContext";
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const { user } = useContext(AppContext);
+
+  useEffect(() => {
+    if (user != null) {
+      const role = user.role;
+
+      if (role === "USER") navigate("/user/dashboard");
+      else if (role === "PROVIDER") navigate("/provider/dashboard");
+    }
+  }, [user, navigate]);
+
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-900 selection:bg-indigo-100 selection:text-indigo-700">
       {/* Navbar - Added Glassmorphism and Sticky */}
@@ -39,7 +52,10 @@ export default function LandingPage() {
             >
               Login
             </button>
-            <button className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-full hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all active:scale-95">
+            <button
+              onClick={() => navigate("/signup")}
+              className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-full hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all active:scale-95"
+            >
               Sign Up
             </button>
           </div>

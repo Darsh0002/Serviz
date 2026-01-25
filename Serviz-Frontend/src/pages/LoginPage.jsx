@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Mail, Lock, Eye, EyeOff, ArrowLeft, Wrench } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { AppContext } from "../context/AppContext";
 import axios from "axios";
@@ -17,7 +17,7 @@ export default function LoginPage() {
       if (role === "USER") navigate("/user/dashboard");
       else if (role === "PROVIDER") navigate("/provider/dashboard");
     }
-  });
+  },[user,navigate]);
 
   const { baseURL } = useContext(AppContext);
   const [showPassword, setShowPassword] = useState(false);
@@ -51,12 +51,7 @@ export default function LoginPage() {
       const loggedUser = await fetchUser();
       setUser(loggedUser);
 
-      // Role-based navigation
-      if (loggedUser.role === "USER") {
-        navigate("/user/dashboard");
-      } else if (loggedUser.role === "PROVIDER") {
-        navigate("/provider/dashboard");
-      }
+      toast.success("Logged in successfully");
     } catch (err) {
       console.error("Login failed", err);
       setUser(null);
@@ -65,6 +60,17 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
+  if (user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#f8fafc]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-slate-600 font-medium">Redirecting you...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#f8fafc] flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
@@ -81,7 +87,7 @@ export default function LoginPage() {
           className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors font-medium text-sm"
         >
           <ArrowLeft size={18} />
-          Back to home
+          Back to Home
         </a>
       </div>
 
@@ -197,12 +203,12 @@ export default function LoginPage() {
 
         <p className="mt-8 text-center text-sm text-slate-600 font-medium">
           Not a member yet?{" "}
-          <a
-            href="#"
+          <Link
+            to="/signup"
             className="text-indigo-600 hover:text-indigo-500 font-bold transition-colors"
           >
             Create an account
-          </a>
+          </Link>
         </p>
       </div>
     </div>
