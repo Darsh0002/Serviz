@@ -1,10 +1,10 @@
 package com.darsh.Serviz_Backend.controllers;
 
 import com.darsh.Serviz_Backend.configs.JwtProvider;
-import com.darsh.Serviz_Backend.dto.LoginRequest;
-import com.darsh.Serviz_Backend.dto.LoginResponse;
-import com.darsh.Serviz_Backend.dto.ProviderSignUpReq;
-import com.darsh.Serviz_Backend.dto.UserSignUpReq;
+import com.darsh.Serviz_Backend.requests.LoginRequest;
+import com.darsh.Serviz_Backend.responses.LoginResponse;
+import com.darsh.Serviz_Backend.requests.ProviderSignUpReq;
+import com.darsh.Serviz_Backend.requests.UserSignUpReq;
 import com.darsh.Serviz_Backend.modals.User;
 import com.darsh.Serviz_Backend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;

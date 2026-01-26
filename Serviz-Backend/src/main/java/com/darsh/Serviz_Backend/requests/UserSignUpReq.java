@@ -1,4 +1,4 @@
-package com.darsh.Serviz_Backend.dto;
+package com.darsh.Serviz_Backend.requests;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

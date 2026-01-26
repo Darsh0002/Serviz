@@ -9,7 +9,7 @@ import lombok.Data;
 public class Provider {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String serviceType;

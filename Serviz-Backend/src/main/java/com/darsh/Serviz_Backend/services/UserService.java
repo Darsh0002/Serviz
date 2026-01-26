@@ -1,8 +1,8 @@
 package com.darsh.Serviz_Backend.services;
 
 import com.darsh.Serviz_Backend.configs.CustomUserDetailsService;
-import com.darsh.Serviz_Backend.dto.ProviderSignUpReq;
-import com.darsh.Serviz_Backend.dto.UserSignUpReq;
+import com.darsh.Serviz_Backend.requests.ProviderSignUpReq;
+import com.darsh.Serviz_Backend.requests.UserSignUpReq;
 import com.darsh.Serviz_Backend.modals.Provider;
 import com.darsh.Serviz_Backend.modals.Role;
 import com.darsh.Serviz_Backend.modals.User;
