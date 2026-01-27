@@ -1,14 +1,14 @@
 package com.darsh.Serviz_Backend.services;
 
+import com.darsh.Serviz_Backend.modals.*;
+import com.darsh.Serviz_Backend.repositories.BidRepo;
 import com.darsh.Serviz_Backend.requests.RequestDTO;
-import com.darsh.Serviz_Backend.modals.ServiceReqStatus;
-import com.darsh.Serviz_Backend.modals.ServiceRequest;
-import com.darsh.Serviz_Backend.modals.User;
 import com.darsh.Serviz_Backend.repositories.ServiceRequestRepo;
 import com.darsh.Serviz_Backend.repositories.UserRepo;
 import com.darsh.Serviz_Backend.responses.ServiceRequestResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,6 +21,9 @@ public class ServiceRequestService {
 
     @Autowired
     private UserRepo userRepo;
+
+    @Autowired
+    private BidRepo bidRepo;
 
     public ServiceRequest createService(RequestDTO req, String email) {
 
@@ -73,5 +76,36 @@ public class ServiceRequestService {
 
             return dto;
         }).toList();
+    }
+
+    @Transactional
+    public void completeJob(Long requestId, String email) {
+
+        ServiceRequest req = serviceRequestRepo.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Request not found"));
+
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Only request owner can complete
+        if (!req.getUserId().equals(user.getId())) {
+            throw new RuntimeException("Not your request");
+        }
+
+        // Must be ASSIGNED
+        if (req.getStatus() != ServiceReqStatus.ASSIGNED) {
+            throw new RuntimeException("Job is not in assigned state");
+        }
+
+        // Ensure an accepted bid exists
+        Bid acceptedBid = bidRepo
+                .findByRequestIdAndStatus(requestId, BidStatus.ACCEPTED)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No accepted provider found"));
+
+        // Mark job completed
+        req.setStatus(ServiceReqStatus.COMPLETED);
+        req.setCompletedAt(LocalDateTime.now());
     }
 }

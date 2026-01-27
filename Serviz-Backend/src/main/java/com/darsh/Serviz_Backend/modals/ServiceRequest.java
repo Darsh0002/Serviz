@@ -23,4 +23,5 @@ public class ServiceRequest {
     private ServiceReqStatus status;  // OPEN, ASSIGNED, COMPLETED, CANCELLED
 
     private LocalDateTime createdAt;
+    private LocalDateTime completedAt;
 }

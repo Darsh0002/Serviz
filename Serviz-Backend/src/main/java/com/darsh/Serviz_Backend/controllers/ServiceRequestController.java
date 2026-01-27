@@ -34,4 +34,17 @@ public class ServiceRequestController {
         List<ServiceRequestResponseDTO> requests = requestService.getOpenRequestsForProvider(userDetails.getUsername());
         return ResponseEntity.ok(requests);
     }
+
+    @PostMapping("/user/requests/{requestId}/complete")
+    public ResponseEntity<String> completeJob(
+            @PathVariable Long requestId,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        requestService.completeJob(
+                requestId,
+                userDetails.getUsername()
+        );
+
+        return ResponseEntity.ok("Job marked as completed");
+    }
 }
