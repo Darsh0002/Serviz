@@ -56,7 +56,7 @@ public class UserService {
 
         Provider provider = new Provider();
         provider.setServiceType(req.getServiceType());
-        provider.setRating(0.0);
+        provider.setAvgRating(0.0);
 
         provider.setUser(newUser);
         newUser.setProvider(provider);

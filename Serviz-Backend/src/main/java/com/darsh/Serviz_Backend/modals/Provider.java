@@ -13,7 +13,7 @@ public class Provider {
     private Long id;
 
     private String serviceType;
-    private double rating;
+    private Double avgRating;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
