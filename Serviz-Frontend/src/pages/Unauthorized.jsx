@@ -4,10 +4,10 @@ const Unauthorized = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 to-purple-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-orange-500 via-purple-500 to-blue-600 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl p-12 max-w-md w-full animate-fadeIn text-center">
         {/* Error Code */}
-        <div className="text-8xl font-black bg-gradient-to-r from-purple-600 to-purple-900 bg-clip-text text-transparent mb-4">
+        <div className="text-8xl font-black bg-linear-to-r from-orange-500 via-purple-500 to-blue-600 bg-clip-text text-transparent mb-4">
           403
         </div>
 
@@ -18,21 +18,20 @@ const Unauthorized = () => {
 
         {/* Message */}
         <p className="text-gray-600 text-base leading-relaxed mb-10">
-          Sorry, you don't have permission to access this page. 
-          Your account doesn't have the required privileges.
+          Sorry, you don't have permission to access this page.
         </p>
 
         {/* Buttons */}
         <div className="flex flex-col gap-3 mb-10 sm:flex-row sm:justify-center">
           <button 
             onClick={() => navigate("/")}
-            className="px-7 py-3 bg-gradient-to-r from-purple-600 to-purple-800 text-white font-semibold rounded-lg hover:shadow-lg hover:-translate-y-1 transition-all duration-200"
+            className="px-7 py-3 bg-gradient-to-r from-orange-500 via-purple-500 to-blue-600 text-white font-semibold rounded-lg hover:shadow-lg hover:-translate-y-1 transition-all duration-200"
           >
             ← Back to Home
           </button>
           <button 
             onClick={() => navigate(-1)}
-            className="px-7 py-3 bg-gray-100 text-purple-600 font-semibold rounded-lg border-2 border-purple-600 hover:bg-purple-600 hover:text-white hover:-translate-y-1 transition-all duration-200"
+            className="px-7 py-3 bg-gray-100 text-orange-600 font-semibold rounded-lg border-2 border-orange-500 hover:bg-gradient-to-r hover:from-orange-500 hover:to-blue-600 hover:text-white hover:-translate-y-1 transition-all duration-200"
           >
             Go Back
           </button>
