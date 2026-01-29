@@ -10,6 +10,8 @@ import ProviderDashboard from "./pages/ProviderDashboard";
 import Unauthorized from "./pages/Unauthorized";
 import LandingPage from "./pages/LandingPage";
 import SignUpPage from "./pages/SignUpPage";
+import LoadingState from "./components/LoadingState";
+import DashboardLayout from "./layouts/DashboardLayout.jsx";
 
 const App = () => {
   return (
@@ -18,19 +20,27 @@ const App = () => {
 
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/loading" element={<LoadingState />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
 
         {/* USER ROUTES */}
         <Route element={<ProtectedRoute allowedRoles={["USER"]} />}>
-          <Route path="/user/dashboard" element={<UserDashboard />} />
+          <Route element={<DashboardLayout />}>
+            <Route path="/user/dashboard" element={<UserDashboard />} />
+            {/* <Route path="/user/requests" element={<MyRequests />} /> */}
+          </Route>
         </Route>
 
         {/* PROVIDER ROUTES */}
         <Route element={<ProtectedRoute allowedRoles={["PROVIDER"]} />}>
-          <Route path="/provider/dashboard" element={<ProviderDashboard />} />
+          <Route element={<DashboardLayout />}>
+            <Route path="/provider/dashboard" element={<ProviderDashboard />} />
+            {/* <Route path="/provider/jobs" element={<AvailableJobs />} /> */}
+          </Route>
         </Route>
+
 
         {/* FALLBACK */}
         <Route path="*" element={<Navigate to="/login" />} />
