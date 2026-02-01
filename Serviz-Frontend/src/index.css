@@ -1,1 +1,16 @@
 @import "tailwindcss";
+
+.btn-primary {
+  @apply flex items-center gap-2 px-4 py-2 rounded-md
+  bg-blue-600 text-white text-sm hover:bg-blue-700 transition;
+}
+
+.btn-secondary {
+  @apply flex items-center gap-2 px-4 py-2 rounded-md
+  border text-sm hover:bg-gray-100 transition;
+}
+
+.btn-danger {
+  @apply flex items-center gap-2 px-4 py-2 rounded-md
+  bg-red-100 text-red-600 text-sm hover:bg-red-200 transition;
+}

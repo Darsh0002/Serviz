@@ -37,11 +37,11 @@ const Sidebar = ({
     return (
         <aside
             className={`
-        fixed md:static z-40 h-full bg-white shadow-md
+        fixed lg:static z-40 h-full bg-white shadow-md
         transition-all duration-300
         ${collapsed ? "w-20" : "w-64"}
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
-        md:translate-x-0
+        lg:translate-x-0
       `}
         >
             {/* Header */}
@@ -50,7 +50,7 @@ const Sidebar = ({
 
                 {/* Mobile close */}
                 <button
-                    className="md:hidden"
+                    className="lg:hidden"
                     onClick={() => setSidebarOpen(false)}
                 >
                     <X size={22}/>

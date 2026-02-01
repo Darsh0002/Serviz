@@ -14,21 +14,25 @@ const DashboardLayout = () => {
             {/* Mobile Overlay */}
             {sidebarOpen && (
                 <div
-                    className="fixed inset-0 bg-black/40 z-30 md:hidden"
+                    className="fixed inset-0 bg-black/40 z-30 lg:hidden"
                     onClick={() => setSidebarOpen(false)}
                 />
             )}
 
-            <Sidebar
-                role={user.role}
-                sidebarOpen={sidebarOpen}
-                setSidebarOpen={setSidebarOpen}
-                collapsed={collapsed}
-                setCollapsed={setCollapsed}
-            />
+            {/* Sidebar - only visible on mobile/tablet */}
+            <div className="lg:hidden">
+                <Sidebar
+                    role={user.role}
+                    sidebarOpen={sidebarOpen}
+                    setSidebarOpen={setSidebarOpen}
+                    collapsed={collapsed}
+                    setCollapsed={setCollapsed}
+                />
+            </div>
 
             <div className="flex-1 flex flex-col">
                 <Navbar
+                    role={user.role}
                     setSidebarOpen={setSidebarOpen}
                     collapsed={collapsed}
                     setCollapsed={setCollapsed}
