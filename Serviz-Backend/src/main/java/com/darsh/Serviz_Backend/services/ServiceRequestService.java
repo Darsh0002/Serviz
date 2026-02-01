@@ -108,4 +108,15 @@ public class ServiceRequestService {
         req.setStatus(ServiceReqStatus.COMPLETED);
         req.setCompletedAt(LocalDateTime.now());
     }
+
+    public List<ServiceRequest> getOpenRequestsForUser(String email) {
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+
+        List<ServiceRequest> requests =
+                serviceRequestRepo.findByUserIdAndStatus(user.getId(),ServiceReqStatus.OPEN);
+
+        return requests;
+    }
 }

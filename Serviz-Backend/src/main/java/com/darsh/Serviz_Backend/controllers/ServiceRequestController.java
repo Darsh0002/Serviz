@@ -1,5 +1,6 @@
 package com.darsh.Serviz_Backend.controllers;
 
+import com.darsh.Serviz_Backend.modals.ServiceRequest;
 import com.darsh.Serviz_Backend.requests.RequestDTO;
 import com.darsh.Serviz_Backend.responses.ServiceRequestResponseDTO;
 import com.darsh.Serviz_Backend.services.ServiceRequestService;
@@ -25,6 +26,14 @@ public class ServiceRequestController {
             ){
         requestService.createService(req, userDetails.getUsername());
         return ResponseEntity.ok("Service Request Created Successfully");
+    }
+
+    @GetMapping("/user/open-req")
+    public ResponseEntity<List<ServiceRequest>> getOpenRequestsForUser(
+            @AuthenticationPrincipal UserDetails userDetails
+    ){
+        List<ServiceRequest> requests = requestService.getOpenRequestsForUser(userDetails.getUsername());
+        return ResponseEntity.ok(requests);
     }
 
     @GetMapping("/provider/requests")

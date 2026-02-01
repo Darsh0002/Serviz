@@ -17,7 +17,7 @@ public class ProviderService {
     @Autowired
     private RatingRepo ratingRepo;
 
-    public List<Provider> getProvidersByServiceType(String serviceType){
+    public List<Provider> getProvidersByServiceType(String serviceType) {
         return providerRepo.findByServiceType(serviceType);
     }
 
@@ -30,5 +30,9 @@ public class ProviderService {
 
         provider.setAvgRating(avg);
         providerRepo.save(provider);
+    }
+
+    public Provider getProviderDetail(Long providerId) {
+        return providerRepo.findById(providerId).orElseThrow(() -> new RuntimeException("Provide with ID:" + providerId + " Not Exists"));
     }
 }
