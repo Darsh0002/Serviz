@@ -35,7 +35,6 @@ public class BidController {
             @PathVariable Long requestId,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-
         List<Bid> bids = bidService.getBidsForRequest(
                 requestId,
                 userDetails.getUsername()

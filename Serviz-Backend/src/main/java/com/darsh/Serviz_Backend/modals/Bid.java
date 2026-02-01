@@ -15,6 +15,7 @@ public class Bid {
 
     private Long requestId;
     private Long providerId;
+    private String providerName;
 
     private Long price;
 

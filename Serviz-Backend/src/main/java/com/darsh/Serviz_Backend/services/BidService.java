@@ -53,6 +53,7 @@ public class BidService {
         Bid bid = new Bid();
         bid.setRequestId(req.getRequestId());
         bid.setProviderId(provider.getId());
+        bid.setProviderName(user.getName());
         bid.setPrice(req.getPrice());
         bid.setMessage(req.getMessage());
         bid.setStatus(BidStatus.PENDING);
