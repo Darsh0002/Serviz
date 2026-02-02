@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -113,10 +114,26 @@ public class ServiceRequestService {
         User user = userRepo.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        return serviceRequestRepo.findByUserIdAndStatus(user.getId(), ServiceReqStatus.OPEN);
+    }
 
-        List<ServiceRequest> requests =
-                serviceRequestRepo.findByUserIdAndStatus(user.getId(),ServiceReqStatus.OPEN);
+    public List<ServiceRequest> getRecentRequestsForUser(String email) {
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return requests;
+
+        List<ServiceRequest> assignedRequests =
+                serviceRequestRepo.findByUserIdAndStatus(user.getId(), ServiceReqStatus.ASSIGNED);
+        List<ServiceRequest> completedRequests =
+                serviceRequestRepo.findByUserIdAndStatus(user.getId(), ServiceReqStatus.COMPLETED);
+        List<ServiceRequest> cancelledRequests =
+                serviceRequestRepo.findByUserIdAndStatus(user.getId(), ServiceReqStatus.CANCELLED);
+
+        List<ServiceRequest> recent = new ArrayList<>();
+        recent.addAll(assignedRequests);
+        recent.addAll(completedRequests);
+        recent.addAll(cancelledRequests);
+
+        return recent;
     }
 }
