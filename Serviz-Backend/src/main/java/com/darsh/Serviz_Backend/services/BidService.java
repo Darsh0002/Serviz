@@ -77,6 +77,14 @@ public class BidService {
         return bidRepo.findByRequestId(requestId);
     }
 
+    public Bid getAcceptedBid(Long requestId){
+        return bidRepo
+                .findByRequestIdAndStatus(requestId, BidStatus.ACCEPTED)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No accepted Bid found"));
+    }
+
     @Transactional
     public void selectProvider(Long requestId, Long bidId, String email) {
 

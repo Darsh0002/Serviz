@@ -43,6 +43,18 @@ public class BidController {
         return ResponseEntity.ok(bids);
     }
 
+    @GetMapping("/user/accepted-bid/{requestId}")
+    public ResponseEntity<Bid> getAcceptedBid(
+            @PathVariable Long requestId,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        Bid acceptedBid = bidService.getAcceptedBid(
+                requestId
+        );
+
+        return ResponseEntity.ok(acceptedBid);
+    }
+
     @PostMapping("/user/requests/{requestId}/select-bid/{bidId}")
     public ResponseEntity<String> selectBid(
             @PathVariable Long requestId,

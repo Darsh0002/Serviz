@@ -36,6 +36,14 @@ public class ServiceRequestController {
         return ResponseEntity.ok(requests);
     }
 
+    @GetMapping("/user/recent-req")
+    public ResponseEntity<List<ServiceRequest>> getRecentRequestsForUser(
+            @AuthenticationPrincipal UserDetails userDetails
+    ){
+        List<ServiceRequest> requests = requestService.getRecentRequestsForUser(userDetails.getUsername());
+        return ResponseEntity.ok(requests);
+    }
+
     @GetMapping("/provider/requests")
     public ResponseEntity<List<ServiceRequestResponseDTO>> getRequestsByCityAndStatus(
             @AuthenticationPrincipal UserDetails userDetails
