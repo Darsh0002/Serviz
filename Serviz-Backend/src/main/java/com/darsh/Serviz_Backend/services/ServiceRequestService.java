@@ -116,24 +116,4 @@ public class ServiceRequestService {
 
         return serviceRequestRepo.findByUserIdAndStatus(user.getId(), ServiceReqStatus.OPEN);
     }
-
-    public List<ServiceRequest> getRecentRequestsForUser(String email) {
-        User user = userRepo.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-
-        List<ServiceRequest> assignedRequests =
-                serviceRequestRepo.findByUserIdAndStatus(user.getId(), ServiceReqStatus.ASSIGNED);
-        List<ServiceRequest> completedRequests =
-                serviceRequestRepo.findByUserIdAndStatus(user.getId(), ServiceReqStatus.COMPLETED);
-        List<ServiceRequest> cancelledRequests =
-                serviceRequestRepo.findByUserIdAndStatus(user.getId(), ServiceReqStatus.CANCELLED);
-
-        List<ServiceRequest> recent = new ArrayList<>();
-        recent.addAll(assignedRequests);
-        recent.addAll(completedRequests);
-        recent.addAll(cancelledRequests);
-
-        return recent;
-    }
 }
