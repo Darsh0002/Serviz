@@ -56,12 +56,12 @@ public class BidController {
     }
 
     @PostMapping("/user/requests/{requestId}/select-bid/{bidId}")
-    public ResponseEntity<String> selectBid(
+    public ResponseEntity<String> acceptBid(
             @PathVariable Long requestId,
             @PathVariable Long bidId,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        bidService.selectProvider(
+        bidService.acceptBid(
                 requestId,
                 bidId,
                 userDetails.getUsername()

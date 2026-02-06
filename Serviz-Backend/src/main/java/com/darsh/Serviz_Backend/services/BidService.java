@@ -1,10 +1,7 @@
 package com.darsh.Serviz_Backend.services;
 
 import com.darsh.Serviz_Backend.modals.*;
-import com.darsh.Serviz_Backend.repositories.BidRepo;
-import com.darsh.Serviz_Backend.repositories.ProviderRepo;
-import com.darsh.Serviz_Backend.repositories.ServiceRequestRepo;
-import com.darsh.Serviz_Backend.repositories.UserRepo;
+import com.darsh.Serviz_Backend.repositories.*;
 import com.darsh.Serviz_Backend.requests.BidRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,6 +24,9 @@ public class BidService {
 
     @Autowired
     private UserRepo userRepo;
+
+    @Autowired
+    private BookingRepo bookingRepo;
 
     public void placeBid(String email, BidRequest req) {
         User user = userRepo.findByEmail(email)
@@ -86,7 +86,7 @@ public class BidService {
     }
 
     @Transactional
-    public void selectProvider(Long requestId, Long bidId, String email) {
+    public void acceptBid(Long requestId, Long bidId, String email) {
 
         ServiceRequest req = requestRepo.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Request not found"));
@@ -104,16 +104,16 @@ public class BidService {
             throw new RuntimeException("Request already assigned");
         }
 
-        Bid selectedBid = bidRepo.findById(bidId)
+        Bid acceptedBid = bidRepo.findById(bidId)
                 .orElseThrow(() -> new RuntimeException("Bid not found"));
 
         // Ensure bid belongs to this request
-        if (!selectedBid.getRequestId().equals(requestId)) {
+        if (!acceptedBid.getRequestId().equals(requestId)) {
             throw new RuntimeException("Bid does not belong to this request");
         }
 
         // Accept selected bid
-        selectedBid.setStatus(BidStatus.ACCEPTED);
+        acceptedBid.setStatus(BidStatus.ACCEPTED);
 
         // Reject all other bids
         bidRepo.findByRequestId(requestId)
@@ -125,5 +125,16 @@ public class BidService {
 
         // Update request status
         req.setStatus(ServiceReqStatus.ASSIGNED);
+
+        Booking booking = new Booking();
+        booking.setRequestId(requestId);
+        booking.setBidId(bidId);
+        booking.setUserId(user.getId());
+        booking.setProviderId(acceptedBid.getProviderId());
+        booking.setPrice(acceptedBid.getPrice());
+        booking.setStatus(BookingStatus.PENDING);
+        booking.setBookedAt(LocalDateTime.now());
+
+        bookingRepo.save(booking);
     }
 }
