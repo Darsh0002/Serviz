@@ -19,7 +19,7 @@ public class BookingController {
     @Autowired
     private BookingService bookingService;
 
-    @GetMapping("/user/")
+    @GetMapping("/user/recent-bookings")
     public ResponseEntity<List<Booking>> getBookingsForUser(
             @AuthenticationPrincipal UserDetails userDetails
     ) {
