@@ -5,8 +5,8 @@ import { Toaster } from "react-hot-toast";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
 import Login from "./pages/LoginPage";
-import UserDashboard from "./pages/UserDashboard";
-import ProviderDashboard from "./pages/ProviderDashboard";
+import UserDashboard from "./pages/user/UserDashboard";
+import ProviderDashboard from "./pages/provider/ProviderDashboard";
 import Unauthorized from "./pages/Unauthorized";
 import LandingPage from "./pages/LandingPage";
 import SignUpPage from "./pages/SignUpPage";

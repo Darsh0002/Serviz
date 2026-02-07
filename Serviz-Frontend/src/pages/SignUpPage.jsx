@@ -12,7 +12,7 @@ import {
   EyeOff,
   Briefcase,
 } from "lucide-react";
-import { useNavigate,Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -49,9 +49,9 @@ export default function SignUpPage() {
 
     try {
       if (role === "USER")
-            await axios.post(`${baseURL}/api/auth/signup/user`, payload);
+        await axios.post(`${baseURL}/api/auth/signup/user`, payload);
       else if (role === "PROVIDER")
-            await axios.post(`${baseURL}/api/auth/signup/provider`, payload);
+        await axios.post(`${baseURL}/api/auth/signup/provider`, payload);
 
       toast.success("Account created! Please login.");
       navigate("/login");
@@ -148,7 +148,7 @@ export default function SignUpPage() {
                 </div>
                 <input
                   id="email"
-                  type="email"
+                  // type="email"
                   required
                   onChange={handleChange}
                   className="block w-full pl-11 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all bg-slate-50/30"
@@ -184,17 +184,27 @@ export default function SignUpPage() {
               </label>
               <div className="mt-1 relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  {/* Use Building2 or MapPin here */}
                   <Building2 className="h-5 w-5 text-slate-400" />
                 </div>
-                <input
+                <select
                   id="city"
-                  type="text"
                   required
                   onChange={handleChange}
-                  className="block w-full pl-11 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all bg-slate-50/30"
-                  placeholder="New York"
-                />
+                  className="block w-full pl-11 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all bg-slate-50/30 appearance-none"
+                >
+                  <option value="">Select City</option>
+                  <option>Delhi</option>
+                  <option>Mumbai</option>
+                  <option>Bengaluru</option>
+                  <option>Kolkata</option>
+                  <option>Chennai</option>
+                  <option>Hyderabad</option>
+                  <option>Pune</option>
+                  <option>Ahmedabad</option>
+                  <option>Surat</option>
+                  <option>Jaipur</option>
+                  <option>Vadodara</option>
+                </select>
               </div>
             </div>
 
@@ -215,12 +225,14 @@ export default function SignUpPage() {
                     className="block w-full pl-11 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all bg-slate-50/30 appearance-none"
                   >
                     <option value="">Select Service</option>
-                    <option value="Plumber">Plumber</option>
-                    <option value="Electrician">Electrician</option>
-                    <option value="Cleaner">Cleaner</option>
-                    <option value="technician">Appliance Repair Technician</option>
-                    <option value="Carpenter">Carpenter</option>
-                    <option value="Painter">Painter</option>
+                    <option>Plumber</option>
+                    <option>Electrician</option>
+                    <option>Carpenter</option>
+                    <option>Technician</option>
+                    <option>Painter</option>
+                    <option>Cleaner</option>
+                    <option>Lock smith</option>
+                    <option>Appliance repair technician</option>
                   </select>
                 </div>
               </div>
@@ -288,16 +300,16 @@ export default function SignUpPage() {
             </div>
           </form>
         </div>
-          </div>
-          <p className="mt-8 text-center text-sm text-slate-600 font-medium">
-          Already a Member?{" "}
-          <Link
-            to="/login"
-            className="text-indigo-600 hover:text-indigo-500 font-bold transition-colors"
-          >
-            Login Here
-          </Link>
-        </p>
+      </div>
+      <p className="mt-8 text-center text-sm text-slate-600 font-medium">
+        Already a Member?{" "}
+        <Link
+          to="/login"
+          className="text-indigo-600 hover:text-indigo-500 font-bold transition-colors"
+        >
+          Login Here
+        </Link>
+      </p>
     </div>
   );
 }

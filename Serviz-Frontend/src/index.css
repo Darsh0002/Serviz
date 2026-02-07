@@ -1,16 +1,21 @@
 @import "tailwindcss";
 
 .btn-primary {
-  @apply flex items-center gap-2 px-4 py-2 rounded-md
-  bg-blue-600 text-white text-sm hover:bg-blue-700 transition;
+  @apply flex items-center gap-2 px-4 py-2 rounded-md text-sm transition transform hover:scale-105;
+  @apply bg-gradient-to-r from-orange-400 via-purple-400 to-blue-500 text-white;
 }
 
 .btn-secondary {
   @apply flex items-center gap-2 px-4 py-2 rounded-md
-  border text-sm hover:bg-gray-100 transition;
+  border border-gray-200 bg-white text-sm hover:bg-gray-50 transition shadow-sm;
 }
 
 .btn-danger {
   @apply flex items-center gap-2 px-4 py-2 rounded-md
   bg-red-100 text-red-600 text-sm hover:bg-red-200 transition;
+}
+
+.input {
+  @apply block w-full px-4 py-3 rounded-lg border border-gray-200 bg-white text-sm placeholder-gray-400
+  focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-transparent transition;
 }
