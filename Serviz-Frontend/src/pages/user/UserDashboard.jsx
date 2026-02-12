@@ -67,6 +67,88 @@ const UserDashboard = () => {
   };
 
   useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  const handlePayment = async (bookingId) => {
+    try {
+      if (!window.Razorpay) {
+        alert("Razorpay SDK not loaded.");
+        return;
+      }
+
+      const token = localStorage.getItem("token");
+
+      const { data } = await axios.post(
+        `http://localhost:8080/api/user/payment/create-order/${bookingId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const order = data;
+      console.log("Order:", order);
+
+      const options = {
+        key: "rzp_test_RrT3R8phNiD2EH",
+        amount: order.amount,
+        currency: "INR",
+        name: "Serviz",
+        description: "Service Payment",
+        order_id: order.id,
+
+        handler: async function (response) {
+          try {
+            await axios.post(
+              "http://localhost:8080/api/user/payment/verify",
+              {
+                ...response,
+                bookingId: bookingId,
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              },
+            );
+
+            alert("Payment Successful 🎉");
+            window.location.reload();
+          } catch (err) {
+            alert("Payment verification failed ❌");
+          }
+        },
+
+        modal: {
+          ondismiss: function () {
+            alert("Payment cancelled");
+          },
+        },
+
+        theme: {
+          color: "#0f172a",
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong while creating payment.");
+    }
+  };
+
+  useEffect(() => {
     fetchOpenRequests();
     fetchRecentBookings();
   }, []);
@@ -193,7 +275,7 @@ const UserDashboard = () => {
                       {req.status === "PENDING" && (
                         <>
                           <button
-                            onClick={() => handleComplete(req.id)}
+                            onClick={() => handlePayment(req.id)}
                             className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg"
                           >
                             Pay & Complete
