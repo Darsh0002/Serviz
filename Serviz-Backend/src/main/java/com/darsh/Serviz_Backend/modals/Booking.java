@@ -6,6 +6,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "bookings")
 @Data
 public class Booking {
 
@@ -13,16 +14,24 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long requestId;
-    private Long bidId;
+    @OneToOne
+    @JoinColumn(name = "bid_id", nullable = false, unique = true)
+    private Bid bid;
 
-    private Long userId;
-    private Long providerId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "provider_id", nullable = false)
+    private Provider provider;
+
+    @Column(nullable = false)
     private Long price;
 
     @Enumerated(EnumType.STRING)
-    private BookingStatus status; // PENDING, COMPLETED, CANCELLED
+    @Column(nullable = false)
+    private BookingStatus status;
 
     private LocalDateTime bookedAt;
     private LocalDateTime completedAt;

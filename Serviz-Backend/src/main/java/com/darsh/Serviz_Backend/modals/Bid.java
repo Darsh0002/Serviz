@@ -6,6 +6,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "bids")
 @Data
 public class Bid {
 
@@ -13,17 +14,23 @@ public class Bid {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long requestId;
-    private Long providerId;
-    private String providerName;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "service_request_id", nullable = false)
+    private ServiceRequest serviceRequest;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "provider_id", nullable = false)
+    private Provider provider;
+
+    @Column(nullable = false)
     private Long price;
 
     @Column(length = 300)
     private String message;
 
     @Enumerated(EnumType.STRING)
-    private BidStatus status; // PENDING, ACCEPTED, REJECTED
+    @Column(nullable = false)
+    private BidStatus status;
 
     private LocalDateTime createdAt;
 }

@@ -6,27 +6,42 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Entity
-@Data
 @Table(
+        name = "ratings",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"userId", "providerId", "requestId"})
+                @UniqueConstraint(columnNames = {"user_id", "provider_id", "service_request_id"})
         }
 )
+@Data
 public class Rating {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long userId;
-    private Long providerId;
-    private Long requestId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    private int score;   // 1–5
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "provider_id", nullable = false)
+    private Provider provider;
+
+    @OneToOne
+    @JoinColumn(name = "service_request_id", nullable = false)
+    private ServiceRequest serviceRequest;
+
+    @Column(nullable = false)
+    private int score;
 
     @Column(length = 300)
     private String review;
 
     private LocalDateTime createdAt;
+
+    @PrePersist
+    public void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 }
 

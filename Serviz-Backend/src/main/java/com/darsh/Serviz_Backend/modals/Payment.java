@@ -14,8 +14,9 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long bookingId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "booking_id", nullable = false, unique = true)
+    private Booking booking;
 
     @Column(unique = true, nullable = false)
     private String razorpayOrderId;
@@ -27,7 +28,7 @@ public class Payment {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private PaymentStatus status; // CREATED, SUCCESS, FAILED
+    private PaymentStatus status;
 
     private LocalDateTime createdAt;
 }
