@@ -25,7 +25,7 @@ public class ServiceRequestController {
             @AuthenticationPrincipal UserDetails userDetails
             ){
         requestService.createService(req, userDetails.getUsername());
-        return ResponseEntity.ok("Service Request Created Successfully");
+        return ResponseEntity.ok("Request Raised Successfully");
     }
 
     @GetMapping("/user/open-req")

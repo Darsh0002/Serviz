@@ -9,9 +9,7 @@ import com.darsh.Serviz_Backend.responses.ServiceRequestResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -26,22 +24,21 @@ public class ServiceRequestService {
     @Autowired
     private BidRepo bidRepo;
 
-    public ServiceRequest createService(RequestDTO req, String email) {
+    public void createService(RequestDTO req, String email) {
 
         User user = userRepo.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         ServiceRequest newReq = new ServiceRequest();
-        newReq.setUserId(user.getId());
+        newReq.setUser(user);
+        newReq.setServiceType(req.getServiceType());
         newReq.setAddress(req.getAddress());
         newReq.setCity(req.getCity());
-        newReq.setServiceType(req.getServiceType());
         newReq.setDescription(req.getDescription());
-
         newReq.setStatus(ServiceReqStatus.OPEN);
         newReq.setCreatedAt(LocalDateTime.now());
 
-        return serviceRequestRepo.save(newReq);
+        serviceRequestRepo.save(newReq);
     }
 
     public List<ServiceRequestResponseDTO> getOpenRequestsForProvider(String email) {
@@ -50,7 +47,7 @@ public class ServiceRequestService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (provider.getProvider() == null) {
-            throw new RuntimeException("User is not a provider");
+            throw new RuntimeException("Access Denied");
         }
 
         List<ServiceRequest> requests =
@@ -61,7 +58,7 @@ public class ServiceRequestService {
                 );
 
         return requests.stream().map(req -> {
-            User user = userRepo.findById(req.getUserId())
+            User user = userRepo.findById(req.getUser().getId())
                     .orElseThrow();
 
             ServiceRequestResponseDTO dto = new ServiceRequestResponseDTO();
@@ -89,7 +86,7 @@ public class ServiceRequestService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         // Only request owner can complete
-        if (!req.getUserId().equals(user.getId())) {
+        if (!req.getUser().getId().equals(user.getId())) {
             throw new RuntimeException("Not your request");
         }
 
@@ -100,10 +97,8 @@ public class ServiceRequestService {
 
         // Ensure an accepted bid exists
         Bid acceptedBid = bidRepo
-                .findByRequestIdAndStatus(requestId, BidStatus.ACCEPTED)
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("No accepted provider found"));
+                .findByServiceRequestAndStatus(req, BidStatus.ACCEPTED)
+                .orElseThrow(() -> new RuntimeException("No accepted bid found"));
 
         // Mark job completed
         req.setStatus(ServiceReqStatus.COMPLETED);
@@ -114,6 +109,6 @@ public class ServiceRequestService {
         User user = userRepo.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return serviceRequestRepo.findByUserIdAndStatus(user.getId(), ServiceReqStatus.OPEN);
+        return serviceRequestRepo.findByUserAndStatus(user, ServiceReqStatus.OPEN);
     }
 }
