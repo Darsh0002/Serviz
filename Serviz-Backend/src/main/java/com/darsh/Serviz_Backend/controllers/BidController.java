@@ -1,7 +1,9 @@
 package com.darsh.Serviz_Backend.controllers;
 
 import com.darsh.Serviz_Backend.modals.Bid;
+import com.darsh.Serviz_Backend.modals.Booking;
 import com.darsh.Serviz_Backend.requests.BidRequest;
+import com.darsh.Serviz_Backend.responses.RecentBidResponse;
 import com.darsh.Serviz_Backend.services.BidService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -69,5 +71,12 @@ public class BidController {
 
         return ResponseEntity.ok("Provider selected successfully");
     }
+
+    @GetMapping("/provider/all-bids")
+    public ResponseEntity<List<RecentBidResponse>> getAllBidsForProvider(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(bidService.getAllBidsByProvider(userDetails.getUsername()));
+    }
+
+
 }
 
