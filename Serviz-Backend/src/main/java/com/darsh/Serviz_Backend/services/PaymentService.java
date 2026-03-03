@@ -21,8 +21,10 @@ import java.util.Map;
 
 @Service
 public class PaymentService {
+
     @Autowired
     private PaymentRepo paymentRepo;
+
     @Autowired
     private BookingRepo bookingRepo;
 
@@ -35,11 +37,11 @@ public class PaymentService {
     public Map<String, Object> createOrder(Long bookingId) throws Exception {
 
         Booking booking = bookingRepo.findById(bookingId)
-                .orElseThrow();
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
 
-        boolean alreadyPaid = paymentRepo
-                .existsByBookingIdAndStatus(
-                        bookingId,
+        boolean alreadyPaid =
+                paymentRepo.existsByBookingAndStatus(
+                        booking,
                         PaymentStatus.SUCCESS
                 );
 
@@ -47,8 +49,7 @@ public class PaymentService {
             throw new RuntimeException("Already Paid");
         }
 
-        RazorpayClient client =
-                new RazorpayClient(keyId, keySecret);
+        RazorpayClient client = new RazorpayClient(keyId, keySecret);
 
         int amountInPaise =
                 (int) Math.round(booking.getPrice() * 100);
@@ -56,7 +57,7 @@ public class PaymentService {
         JSONObject options = new JSONObject();
         options.put("amount", amountInPaise);
         options.put("currency", "INR");
-        options.put("receipt", "txn_" + bookingId);
+        options.put("receipt", "txn_" + booking.getId());
 
         Order order = client.orders.create(options);
 
@@ -84,12 +85,15 @@ public class PaymentService {
             return "Payment Failed";
         }
 
-        Long bookingId = Long.parseLong(data.get("bookingId"));
+        Long bookingId =
+                Long.parseLong(data.get("bookingId"));
 
-        // Prevent duplicate insert
-        boolean alreadyPaid = paymentRepo
-                .existsByBookingIdAndStatus(
-                        bookingId,
+        Booking booking = bookingRepo.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+        boolean alreadyPaid =
+                paymentRepo.existsByBookingAndStatus(
+                        booking,
                         PaymentStatus.SUCCESS
                 );
 
@@ -97,11 +101,8 @@ public class PaymentService {
             return "Already Paid";
         }
 
-        Booking booking = bookingRepo.findById(bookingId)
-                .orElseThrow();
-
         Payment payment = new Payment();
-        payment.setBookingId(bookingId);
+        payment.setBooking(booking);
         payment.setRazorpayOrderId(orderId);
         payment.setRazorpayPaymentId(paymentId);
         payment.setAmount(Double.valueOf(booking.getPrice()));
@@ -112,9 +113,9 @@ public class PaymentService {
 
         booking.setStatus(BookingStatus.COMPLETED);
         booking.setCompletedAt(LocalDateTime.now());
+
         bookingRepo.save(booking);
 
         return "Payment Verified";
     }
-
 }

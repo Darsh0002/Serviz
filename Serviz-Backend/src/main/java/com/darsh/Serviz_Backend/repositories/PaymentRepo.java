@@ -1,5 +1,6 @@
 package com.darsh.Serviz_Backend.repositories;
 
+import com.darsh.Serviz_Backend.modals.Booking;
 import com.darsh.Serviz_Backend.modals.Payment;
 import com.darsh.Serviz_Backend.modals.PaymentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,9 +14,9 @@ public interface PaymentRepo extends JpaRepository<Payment,Long> {
             Long bookingId,
             PaymentStatus status
     );
-    boolean existsByBookingIdAndStatus(
-            Long bookingId,
+
+    boolean existsByBookingAndStatus(
+            Booking booking,
             PaymentStatus status
     );
-
 }
