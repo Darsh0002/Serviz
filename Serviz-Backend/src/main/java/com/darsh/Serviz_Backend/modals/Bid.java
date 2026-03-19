@@ -1,13 +1,17 @@
 package com.darsh.Serviz_Backend.modals;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "bids")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Bid {
 
     @Id

@@ -1,13 +1,17 @@
 package com.darsh.Serviz_Backend.modals;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "bookings")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Booking {
 
     @Id
@@ -25,9 +29,6 @@ public class Booking {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "provider_id", nullable = false)
     private Provider provider;
-
-    @Column(nullable = false)
-    private Long price;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

@@ -1,13 +1,17 @@
 package com.darsh.Serviz_Backend.modals;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "payments")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Payment {
 
     @Id
@@ -24,11 +28,13 @@ public class Payment {
     private String razorpayPaymentId;
 
     @Column(nullable = false)
-    private Double amount;
+    private Long amount;// in paise
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PaymentStatus status;
 
     private LocalDateTime createdAt;
+
+    private LocalDateTime paidAt;
 }

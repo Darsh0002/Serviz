@@ -1,7 +1,10 @@
 package com.darsh.Serviz_Backend.modals;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -13,6 +16,8 @@ import java.time.LocalDateTime;
         }
 )
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Rating {
 
     @Id
@@ -28,20 +33,15 @@ public class Rating {
     private Provider provider;
 
     @OneToOne
-    @JoinColumn(name = "service_request_id", nullable = false)
-    private ServiceRequest serviceRequest;
+    @JoinColumn(name = "booking_id", nullable = false)
+    private Booking booking;
 
     @Column(nullable = false)
-    private int score;
+    private int score; // 1-5
 
     @Column(length = 300)
     private String review;
 
     private LocalDateTime createdAt;
-
-    @PrePersist
-    public void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
 }
 
