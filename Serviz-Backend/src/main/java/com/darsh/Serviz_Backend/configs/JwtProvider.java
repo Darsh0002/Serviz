@@ -2,17 +2,29 @@ package com.darsh.Serviz_Backend.configs;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.stereotype.Component;
+
 import javax.crypto.SecretKey;
 import java.util.Date;
 
+@Component
 public class JwtProvider {
 
-    static SecretKey key = Keys.hmacShaKeyFor("fhbejfbkernfvjrngjkungjknsvjusgntgbjkensamfbrvjkhjksrng,rk".getBytes());
+    @Value("${jwt.secret}")
+    private String secretKey;
 
-    public static String generateToken(Authentication auth) {
+    private static final long EXPIRATION_MS = 86400000L; // 24 hours
+
+    private SecretKey getKey() {
+        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
+    }
+
+    public String generateToken(Authentication auth) {
 
         String role = auth.getAuthorities()
                 .stream()
@@ -23,18 +35,24 @@ public class JwtProvider {
 
         return Jwts.builder()
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 1 day
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_MS)) // 1 day
                 .claim("email", auth.getName())
                 .claim("role", role)
-                .signWith(key)
+                .signWith(getKey())
                 .compact();
     }
 
-    public static String getEmailFromToken(String jwt) {
+    public String getEmailFromToken(String jwt) {
         if (jwt != null && jwt.startsWith("Bearer ")) {
             jwt = jwt.substring(7);
         }
-        Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(jwt).getBody();
+
+        Claims claims = Jwts.parserBuilder().
+                setSigningKey(getKey()).
+                build().
+                parseClaimsJws(jwt).
+                getBody();
+
         return String.valueOf(claims.get("email"));
     }
 }
