@@ -29,6 +29,8 @@ public class Bid {
     @Column(nullable = false)
     private Long price;
 
+    private Integer estimatedTimeInHours;
+
     @Column(length = 300)
     private String message;
 

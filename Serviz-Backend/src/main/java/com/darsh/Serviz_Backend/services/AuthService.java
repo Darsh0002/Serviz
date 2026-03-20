@@ -3,7 +3,7 @@ package com.darsh.Serviz_Backend.services;
 import com.darsh.Serviz_Backend.configs.CustomUserDetailsService;
 import com.darsh.Serviz_Backend.configs.JwtProvider;
 import com.darsh.Serviz_Backend.repositories.ProviderRepo;
-import com.darsh.Serviz_Backend.requests.LoginRequest;
+import com.darsh.Serviz_Backend.requests.LoginReq;
 import com.darsh.Serviz_Backend.requests.ProviderSignUpReq;
 import com.darsh.Serviz_Backend.requests.UserSignUpReq;
 import com.darsh.Serviz_Backend.modals.Provider;
@@ -73,7 +73,7 @@ public class AuthService {
         return providerRepo.save(newProvider);
     }
 
-    public LoginResponse login(LoginRequest req) {
+    public LoginResponse login(LoginReq req) {
         Authentication authentication = authenticate(req.getEmail(), req.getPassword());
         String token = jwtProvider.generateToken(authentication);
         return new LoginResponse("Login successful", token);

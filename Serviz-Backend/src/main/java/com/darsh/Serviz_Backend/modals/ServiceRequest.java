@@ -25,6 +25,10 @@ public class ServiceRequest {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assigned_provider_id")  // nullable until bid is accepted
+    private Provider assignedProvider;
+
     @Column(nullable = false)
     private String serviceType;
 

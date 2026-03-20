@@ -1,7 +1,7 @@
 package com.darsh.Serviz_Backend.controllers;
 
 import com.darsh.Serviz_Backend.modals.Provider;
-import com.darsh.Serviz_Backend.requests.LoginRequest;
+import com.darsh.Serviz_Backend.requests.LoginReq;
 import com.darsh.Serviz_Backend.responses.LoginResponse;
 import com.darsh.Serviz_Backend.requests.ProviderSignUpReq;
 import com.darsh.Serviz_Backend.requests.UserSignUpReq;
@@ -46,7 +46,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> loginUser(@RequestBody LoginRequest req) {
+    public ResponseEntity<LoginResponse> loginUser(@RequestBody LoginReq req) {
 
         try {
             return ResponseEntity.ok(authService.login(req));

@@ -20,6 +20,12 @@ import java.util.Collections;
 @EnableWebSecurity
 public class AppConfig {
 
+    private final JwtTokenValidator jwtTokenValidator;
+
+    public AppConfig(JwtTokenValidator jwtTokenValidator) {
+        this.jwtTokenValidator = jwtTokenValidator;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
@@ -44,7 +50,7 @@ public class AppConfig {
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(
-                        new JwtTokenValidator(),
+                        jwtTokenValidator,
                         BasicAuthenticationFilter.class
                 )
                 .csrf(csrf -> csrf.disable())
