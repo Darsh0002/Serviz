@@ -14,5 +14,6 @@ public interface ServiceRequestRepo extends JpaRepository<ServiceRequest, Long> 
             ServiceReqStatus status
     );
 
+    List<ServiceRequest> findByUserId(Long userId);
     List<ServiceRequest> findByUserAndStatus(User user, ServiceReqStatus serviceReqStatus);
 }

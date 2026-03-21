@@ -1,14 +1,12 @@
 package com.darsh.Serviz_Backend.services;
 
 import com.darsh.Serviz_Backend.modals.*;
-import com.darsh.Serviz_Backend.repositories.BidRepo;
-import com.darsh.Serviz_Backend.requests.RequestDTO;
-import com.darsh.Serviz_Backend.repositories.ServiceRequestRepo;
-import com.darsh.Serviz_Backend.repositories.UserRepo;
-import com.darsh.Serviz_Backend.responses.ServiceRequestResponseDTO;
+import com.darsh.Serviz_Backend.repositories.*;
+import com.darsh.Serviz_Backend.requests.ServiceRequestReq;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
+import org.springframework.security.access.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -22,9 +20,16 @@ public class ServiceRequestService {
     private UserRepo userRepo;
 
     @Autowired
+    private ProviderRepo providerRepo;
+
+    @Autowired
     private BidRepo bidRepo;
 
-    public void createService(RequestDTO req, String email) {
+    @Autowired
+    private BookingRepo bookingRepo;
+
+    // ── User: Raise a service request ────────────────────────────
+    public ServiceRequest createRequest(String email, ServiceRequestReq req) {
 
         User user = userRepo.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -38,71 +43,74 @@ public class ServiceRequestService {
         newReq.setStatus(ServiceReqStatus.OPEN);
         newReq.setCreatedAt(LocalDateTime.now());
 
-        serviceRequestRepo.save(newReq);
+        return serviceRequestRepo.save(newReq);
     }
 
-    public List<ServiceRequestResponseDTO> getOpenRequestsForProvider(String email) {
-
-        User provider = userRepo.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        if (provider.getProvider() == null) {
-            throw new RuntimeException("Access Denied");
-        }
-
-        List<ServiceRequest> requests =
-                serviceRequestRepo.findByCityAndServiceTypeAndStatus(
-                        provider.getCity(),
-                        provider.getProvider().getServiceType(),
-                        ServiceReqStatus.OPEN
-                );
-
-        return requests.stream().map(req -> {
-            User user = userRepo.findById(req.getUser().getId())
-                    .orElseThrow();
-
-            ServiceRequestResponseDTO dto = new ServiceRequestResponseDTO();
-            dto.setId(req.getId());
-            dto.setServiceType(req.getServiceType());
-            dto.setAddress(req.getAddress());
-            dto.setCity(req.getCity());
-            dto.setDescription(req.getDescription());
-            dto.setUserName(user.getName());
-            dto.setUserPhone(user.getPhone());
-            dto.setStatus(req.getStatus());
-            dto.setCreatedAt(req.getCreatedAt());
-
-            return dto;
-        }).toList();
-    }
-
-    @Transactional
-    public void completeJob(Long requestId, String email) {
-
-        ServiceRequest req = serviceRequestRepo.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Request not found"));
-
+    // ── User: View own requests ───────────────────────────────────
+    public List<ServiceRequest> getUserRequests(String email) {
         User user = userRepo.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+        return serviceRequestRepo.findByUserId(user.getId());
+    }
 
-        // Only request owner can complete
-        if (!req.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("Not your request");
+    // ── User: Cancel a request ────────────────────────────────────
+    public ServiceRequest cancelRequest(String email, Long requestId) {
+        ServiceRequest request = getRequestAndVerifyOwner(email, requestId);
+
+        if (request.getStatus() == ServiceReqStatus.COMPLETED) {
+            throw new RuntimeException("Cannot cancel a completed request");
+        }
+        if (request.getStatus() == ServiceReqStatus.CANCELLED) {
+            throw new RuntimeException("Request is already cancelled");
         }
 
-        // Must be ASSIGNED
+        request.setStatus(ServiceReqStatus.CANCELLED);
+
+        bookingRepo.findByBidServiceRequestId(requestId).ifPresent(booking -> {
+            booking.setStatus(BookingStatus.CANCELLED);
+            bookingRepo.save(booking);
+        });
+
+        return serviceRequestRepo.save(request);
+    }
+
+    // ── Provider: View OPEN requests matching their service type ──
+    public List<ServiceRequest> getOpenRequestsForProvider(String email) {
+
+        Provider provider = providerRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Provider not found"));
+
+        return serviceRequestRepo.findByCityAndServiceTypeAndStatus(
+                        provider.getCity(),
+                        provider.getServiceType(),
+                        ServiceReqStatus.OPEN
+                );
+    }
+
+    public ServiceRequest completeRequest(Long requestId, String email) {
+
+        ServiceRequest req = getRequestAndVerifyOwner(email, requestId);
+
         if (req.getStatus() != ServiceReqStatus.ASSIGNED) {
-            throw new RuntimeException("Job is not in assigned state");
+            throw new RuntimeException("Request is not in an assigned state");
         }
 
         // Ensure an accepted bid exists
-        Bid acceptedBid = bidRepo
-                .findByServiceRequestAndStatus(req, BidStatus.ACCEPTED)
-                .orElseThrow(() -> new RuntimeException("No accepted bid found"));
+        List<Bid> acceptedBids = bidRepo.findByServiceRequestIdAndStatus(requestId, BidStatus.ACCEPTED);
+        if (acceptedBids.isEmpty()) {
+            throw new RuntimeException("No accepted bid found");
+        }
+
+        bookingRepo.findByBidServiceRequestId(requestId).ifPresent(booking -> {
+            booking.setStatus(BookingStatus.COMPLETED);
+            booking.setCompletedAt(LocalDateTime.now());
+            bookingRepo.save(booking);
+        });
 
         // Mark job completed
         req.setStatus(ServiceReqStatus.COMPLETED);
         req.setCompletedAt(LocalDateTime.now());
+        return serviceRequestRepo.save(req);
     }
 
     public List<ServiceRequest> getOpenRequestsForUser(String email) {
@@ -110,5 +118,18 @@ public class ServiceRequestService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         return serviceRequestRepo.findByUserAndStatus(user, ServiceReqStatus.OPEN);
+    }
+
+    // ── Helper ────────────────────────────────────────────────────
+
+    public ServiceRequest getRequestAndVerifyOwner(String email, Long requestId){
+        ServiceRequest request = serviceRequestRepo.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Request not found"));
+
+        if (!request.getUser().getEmail().equals(email)) {
+            throw new AccessDeniedException("You do not own this request");
+        }
+
+        return request;
     }
 }
