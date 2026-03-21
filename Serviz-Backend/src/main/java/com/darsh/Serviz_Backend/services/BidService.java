@@ -2,9 +2,8 @@ package com.darsh.Serviz_Backend.services;
 
 import com.darsh.Serviz_Backend.modals.*;
 import com.darsh.Serviz_Backend.repositories.*;
-import com.darsh.Serviz_Backend.requests.BidRequest;
-import com.darsh.Serviz_Backend.responses.RecentBidResponse;
-import org.jspecify.annotations.Nullable;
+import com.darsh.Serviz_Backend.requests.BidReq;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,153 +18,111 @@ public class BidService {
     private BidRepo bidRepo;
 
     @Autowired
-    private ServiceRequestRepo requestRepo;
+    private ServiceRequestRepo serviceRequestRepo;
+
+    @Autowired
+    private ServiceRequestService serviceRequestService;
 
     @Autowired
     private ProviderRepo providerRepo;
 
     @Autowired
-    private UserRepo userRepo;
-
-    @Autowired
     private BookingRepo bookingRepo;
 
-    public void placeBid(String email, BidRequest req) {
-        User user = userRepo.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public Bid placeBid(String email, BidReq req) {
+        Provider provider = providerRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Provider not found"));
 
-        Provider provider = user.getProvider();
-
-        if (provider == null) {
-            throw new RuntimeException("Access denied");
-        }
-
-        ServiceRequest serviceReq = requestRepo.findById(req.getRequestId())
+        ServiceRequest serviceRequest = serviceRequestRepo.findById(req.getRequestId())
                 .orElseThrow(() -> new RuntimeException("Request not found"));
 
-        if (serviceReq.getStatus() != ServiceReqStatus.OPEN) {
-            throw new RuntimeException("Bidding closed");
+        if(!provider.getServiceType().equals(serviceRequest.getServiceType())){
+            throw new RuntimeException("You are not eligible to bid on this request");
         }
 
-        if (!serviceReq.getCity().equals(provider.getUser().getCity()) ||
-                !serviceReq.getServiceType().equals(provider.getServiceType())) {
-            throw new RuntimeException("Request does not match provider");
+        if (!provider.getCity().equalsIgnoreCase(serviceRequest.getCity())) {
+            throw new RuntimeException("You cannot bid on requests outside your city");
         }
 
-        if (bidRepo.existsByServiceRequestAndProvider(serviceReq, provider)) {
-            throw new RuntimeException("Already bid on this request");
+        if (serviceRequest.getStatus() != ServiceReqStatus.OPEN) {
+            throw new RuntimeException("Request is not open for bidding");
+        }
+
+        // Prevent duplicate bids from the same provider
+        if (bidRepo.existsByServiceRequestIdAndProviderId(req.getRequestId(), provider.getId())) {
+            throw new RuntimeException("You have already placed a bid");
         }
 
         Bid bid = new Bid();
-        bid.setServiceRequest(serviceReq);
+        bid.setServiceRequest(serviceRequest);
         bid.setProvider(provider);
         bid.setPrice(req.getPrice());
+        bid.setEstimatedTimeInHours(req.getEstimatedTimeInHours());
         bid.setMessage(req.getMessage());
         bid.setStatus(BidStatus.PENDING);
         bid.setCreatedAt(LocalDateTime.now());
 
-        bidRepo.save(bid);
+        return bidRepo.save(bid);
     }
 
-    public List<Bid> getBidsForRequest(Long requestId, String email) {
-
-        ServiceRequest req = requestRepo.findById(requestId)
-                .orElseThrow();
-
-        User user = userRepo.findByEmail(email)
-                .orElseThrow();
-
-        if (!req.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("Not your request");
-        }
-
-        return bidRepo.findByServiceRequest(req);
+    public List<Bid> getBidsForRequest(Long requestId, String email) throws BadRequestException {
+        ServiceRequest request = serviceRequestService.getRequestAndVerifyOwner(email, requestId);
+        return bidRepo.findByServiceRequestId(request.getId());
     }
 
-    public Bid getAcceptedBid(Long requestId){
-        ServiceRequest req = requestRepo.findById(requestId)
+    public Bid getAcceptedBid(Long requestId) {
+        serviceRequestRepo.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Request not found"));
 
         return bidRepo
-                .findByServiceRequestAndStatus(req, BidStatus.ACCEPTED)
+                .findByServiceRequestIdAndStatus(requestId, BidStatus.ACCEPTED)
+                .stream()
+                .findFirst()
                 .orElseThrow(() -> new RuntimeException("No accepted bid found"));
     }
 
+    // ── User: Accept a bid ────────────────────────────────────────
+
     @Transactional
-    public void acceptBid(Long requestId, Long bidId, String email) {
+    public ServiceRequest acceptBid(String email, Long requestId, Long bidId) throws BadRequestException {
+        ServiceRequest request = serviceRequestService.getRequestAndVerifyOwner(email, requestId);
 
-        ServiceRequest req = requestRepo.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Request not found"));
-
-        User user = userRepo.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        // Ownership check
-        if (!req.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("Not your request");
-        }
-
-        // Status check
-        if (req.getStatus() != ServiceReqStatus.OPEN) {
-            throw new RuntimeException("Request already assigned");
+        if (request.getStatus() != ServiceReqStatus.OPEN) {
+            throw new RuntimeException("Request is no longer open for bidding");
         }
 
         Bid acceptedBid = bidRepo.findById(bidId)
                 .orElseThrow(() -> new RuntimeException("Bid not found"));
 
-        // Ensure bid belongs to this request
         if (!acceptedBid.getServiceRequest().getId().equals(requestId)) {
             throw new RuntimeException("Bid does not belong to this request");
         }
 
-        // Accept selected bid
+        // Accept the chosen bid
         acceptedBid.setStatus(BidStatus.ACCEPTED);
+        bidRepo.save(acceptedBid);
 
         // Reject all other bids
-        bidRepo.findByServiceRequest(req)
-                .forEach(b -> {
-                    if (!b.getId().equals(bidId)) {
-                        b.setStatus(BidStatus.REJECTED);
-                    }
-                });
+        List<Bid> otherBids = bidRepo.findByServiceRequestIdAndStatus(
+                requestId, BidStatus.PENDING
+        );
+        otherBids.forEach(bid -> bid.setStatus(BidStatus.REJECTED));
+        bidRepo.saveAll(otherBids);
 
-        // Update request status
-        req.setStatus(ServiceReqStatus.ASSIGNED);
+        // Assign provider and update status
+        request.setAssignedProvider(acceptedBid.getProvider());
+        request.setStatus(ServiceReqStatus.ASSIGNED);
+        serviceRequestRepo.save(request);
 
         Booking booking = new Booking();
         booking.setBid(acceptedBid);
-        booking.setUser(user);
+        booking.setUser(request.getUser());
         booking.setProvider(acceptedBid.getProvider());
-        booking.setPrice(acceptedBid.getPrice());
-        booking.setStatus(BookingStatus.PENDING);
+        booking.setStatus(BookingStatus.SCHEDULED);
         booking.setBookedAt(LocalDateTime.now());
 
         bookingRepo.save(booking);
-    }
 
-    public List<RecentBidResponse> getAllBidsByProvider(String email) {
-
-        User user = userRepo.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        Provider provider = user.getProvider();
-
-        List<Bid> bids = bidRepo.findByProvider(provider);
-
-
-        return bids.stream()
-                .map(bid -> {
-                    RecentBidResponse res = new RecentBidResponse();
-
-                    res.setDescription(bid.getServiceRequest().getDescription());
-                    res.setUserName(bid.getServiceRequest().getUser().getName());
-                    res.setPrice(bid.getPrice());
-                    res.setMessage(bid.getMessage());
-                    res.setStatus(bid.getServiceRequest().getStatus());
-                    res.setCreatedAt(bid.getCreatedAt());
-
-                    return res;
-                })
-                .toList();
+        return request;
     }
 }

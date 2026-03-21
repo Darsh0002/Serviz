@@ -12,12 +12,11 @@ import java.util.Optional;
 @Repository
 public interface BidRepo extends JpaRepository<Bid, Long> {
 
-    boolean existsByServiceRequestAndProvider(ServiceRequest serviceReq, Provider provider);
+    boolean existsByServiceRequestIdAndProviderId(Long serviceRequestId, Long providerId);
+    Optional<Bid> findByServiceRequestIdAndProviderId(Long serviceRequestId, Long providerId);
 
-    List<Bid> findByServiceRequest(ServiceRequest request);
-
-    Optional<Bid> findByServiceRequestAndStatus(ServiceRequest req, BidStatus bidStatus);
+    List<Bid> findByServiceRequestId(Long serviceRequestId);
+    List<Bid> findByServiceRequestIdAndStatus(Long serviceRequestId, BidStatus status);
 
     List<Bid> findByProvider(Provider provider);
 }
-

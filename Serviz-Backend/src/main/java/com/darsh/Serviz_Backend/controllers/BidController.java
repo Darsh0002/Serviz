@@ -1,12 +1,13 @@
 package com.darsh.Serviz_Backend.controllers;
 
 import com.darsh.Serviz_Backend.modals.Bid;
-import com.darsh.Serviz_Backend.modals.Booking;
-import com.darsh.Serviz_Backend.requests.BidRequest;
-import com.darsh.Serviz_Backend.responses.RecentBidResponse;
+import com.darsh.Serviz_Backend.modals.ServiceRequest;
+import com.darsh.Serviz_Backend.requests.BidReq;
 import com.darsh.Serviz_Backend.services.BidService;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -21,28 +22,20 @@ public class BidController {
     private BidService bidService;
 
     @PostMapping("/provider/bid")
-    public ResponseEntity<String> placeBid(
-            @RequestBody BidRequest req,
-            @AuthenticationPrincipal UserDetails userDetails
+    public ResponseEntity<Bid> placeBid(
+            @RequestBody BidReq req,
+            Authentication auth
     ) {
-        bidService.placeBid(
-                userDetails.getUsername(),
-                req
-        );
-        return ResponseEntity.ok("Bid placed successfully");
+        return ResponseEntity.ok(bidService.placeBid(auth.getName(), req));
     }
 
-    @GetMapping("/user/requests/{requestId}/bids")
+    // View bids on a specific request
+    @GetMapping("/user/request/{requestId}/bids")
     public ResponseEntity<List<Bid>> getBidsForRequest(
             @PathVariable Long requestId,
-            @AuthenticationPrincipal UserDetails userDetails
-    ) {
-        List<Bid> bids = bidService.getBidsForRequest(
-                requestId,
-                userDetails.getUsername()
-        );
-
-        return ResponseEntity.ok(bids);
+            Authentication auth
+    ) throws BadRequestException {
+        return ResponseEntity.ok(bidService.getBidsForRequest(requestId, auth.getName()));
     }
 
     @GetMapping("/user/accepted-bid/{requestId}")
@@ -57,26 +50,13 @@ public class BidController {
         return ResponseEntity.ok(acceptedBid);
     }
 
-    @PostMapping("/user/requests/{requestId}/select-bid/{bidId}")
-    public ResponseEntity<String> acceptBid(
+    @PostMapping("/user/requests/{requestId}/accept-bid/{bidId}")
+    public ResponseEntity<ServiceRequest> acceptBid(
             @PathVariable Long requestId,
             @PathVariable Long bidId,
-            @AuthenticationPrincipal UserDetails userDetails
-    ) {
-        bidService.acceptBid(
-                requestId,
-                bidId,
-                userDetails.getUsername()
-        );
-
-        return ResponseEntity.ok("Provider selected successfully");
+            Authentication auth
+    ) throws BadRequestException {
+        return ResponseEntity.ok(bidService.acceptBid(auth.getName(), requestId, bidId));
     }
-
-    @GetMapping("/provider/all-bids")
-    public ResponseEntity<List<RecentBidResponse>> getAllBidsForProvider(@AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(bidService.getAllBidsByProvider(userDetails.getUsername()));
-    }
-
-
 }
 
