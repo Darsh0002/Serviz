@@ -1,8 +1,12 @@
 package com.darsh.Serviz_Backend.controllers;
 
+import com.darsh.Serviz_Backend.modals.Payment;
+import com.darsh.Serviz_Backend.requests.PaymentVerifyRequest;
 import com.darsh.Serviz_Backend.services.PaymentService;
+import com.razorpay.RazorpayException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -16,20 +20,27 @@ public class PaymentController {
 
     @PostMapping("/create-order/{bookingId}")
     public ResponseEntity<?> createOrder(
-            @PathVariable Long bookingId) throws Exception {
+            @PathVariable Long bookingId,
+            Authentication auth) throws RazorpayException {
 
         return ResponseEntity.ok(
-                paymentService.createOrder(bookingId)
+                paymentService.createOrder(auth.getName(), bookingId)
         );
     }
 
     @PostMapping("/verify")
     public ResponseEntity<?> verify(
-            @RequestBody Map<String, String> data)
-            throws Exception {
+            @RequestBody PaymentVerifyRequest req
+    ) throws RazorpayException {
+        return ResponseEntity.ok(paymentService.verifyPayment(req));
+    }
 
-        return ResponseEntity.ok(
-                paymentService.verifyPayment(data)
-        );
+    // Get payment status by booking ID
+    @GetMapping("/u/payment/booking/{bookingId}")
+    public ResponseEntity<Payment> getPaymentByBookingId(
+            @PathVariable Long bookingId,
+            Authentication auth
+    ) {
+        return ResponseEntity.ok(paymentService.getPaymentByBookingId(auth.getName(), bookingId));
     }
 }

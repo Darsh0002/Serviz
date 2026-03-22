@@ -1,5 +1,6 @@
 package com.darsh.Serviz_Backend.exceptions;
 
+import com.razorpay.RazorpayException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -32,6 +33,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(Exception e) {
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong");
+    }
+
+    @ExceptionHandler(RazorpayException.class)
+    public ResponseEntity<Map<String, Object>> handleRazorpayException(RazorpayException e) {
+        return buildResponse(HttpStatus.BAD_GATEWAY, "Payment gateway error: " + e.getMessage());
     }
 
     private ResponseEntity<Map<String, Object>> buildResponse(HttpStatus status, String message) {
