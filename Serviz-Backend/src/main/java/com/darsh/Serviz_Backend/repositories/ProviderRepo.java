@@ -5,8 +5,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ProviderRepo extends JpaRepository<Provider,Long> {
     List<Provider> findByServiceType(String serviceType);
+
+    boolean existsByEmail(String email);
+
+    Optional<Provider> findByEmail(String email);
 }
