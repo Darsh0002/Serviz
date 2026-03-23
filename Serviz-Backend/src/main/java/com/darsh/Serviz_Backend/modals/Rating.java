@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -12,7 +11,7 @@ import java.time.LocalDateTime;
 @Table(
         name = "ratings",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"user_id", "provider_id", "service_request_id"})
+                @UniqueConstraint(columnNames = {"user_id", "provider_id", "booking_id"})
         }
 )
 @Data
