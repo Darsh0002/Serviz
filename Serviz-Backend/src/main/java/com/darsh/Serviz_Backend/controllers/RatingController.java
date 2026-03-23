@@ -19,7 +19,7 @@ public class RatingController {
     private RatingService ratingService;
 
     // User submits a rating after completed booking
-    @PostMapping("/user/rating")
+    @PostMapping("/rating")
     public ResponseEntity<Rating> submitRating(
             @RequestBody RatingRequest req,
             Authentication auth

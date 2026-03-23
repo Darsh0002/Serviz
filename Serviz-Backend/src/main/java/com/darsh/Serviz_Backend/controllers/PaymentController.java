@@ -36,7 +36,7 @@ public class PaymentController {
     }
 
     // Get payment status by booking ID
-    @GetMapping("/u/payment/booking/{bookingId}")
+    @GetMapping("/booking/{bookingId}")
     public ResponseEntity<Payment> getPaymentByBookingId(
             @PathVariable Long bookingId,
             Authentication auth

@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class PaymentService {
@@ -56,9 +57,16 @@ public class PaymentService {
             throw new RuntimeException("Payment can only be made for scheduled bookings");
         }
 
-        // Prevent duplicate payment
-        if (paymentRepo.findByBookingId(booking.getId()).isPresent()) {
-            throw new RuntimeException("Payment already initiated for this booking");
+        // If PENDING payment exists, return it so frontend can reuse the order
+        Optional<Payment> existingPayment = paymentRepo.findByBookingId(booking.getId());
+        if (existingPayment.isPresent()) {
+            Payment existing = existingPayment.get();
+            if (existing.getStatus() == PaymentStatus.PENDING) {
+                return existing; // reuse existing Razorpay order
+            }
+            if (existing.getStatus() == PaymentStatus.SUCCESS) {
+                throw new RuntimeException("Payment already completed for this booking");
+            }
         }
 
         // Amount from accepted bid (convert to paise)
