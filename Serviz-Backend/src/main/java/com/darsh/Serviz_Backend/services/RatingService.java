@@ -63,10 +63,12 @@ public class RatingService {
         return rating;
     }
 
-    public List<Rating> getProviderRatings(Long providerId) {
-        providerRepo.findById(providerId)
+    public List<Rating> getProviderRatings(String email) {
+
+        Provider provider = providerRepo.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Provider not found"));
-        return ratingRepo.findByProviderId(providerId);
+
+        return ratingRepo.findByProviderId(provider.getId());
     }
 
     private void updateProviderAvgRating(Provider provider) {
