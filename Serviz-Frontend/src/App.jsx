@@ -1,51 +1,106 @@
-import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
+import { AuthProvider } from "./context/AuthContext";
+import { AppProvider } from "./context/AppContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 
-import ProtectedRoute from "./routes/ProtectedRoute";
+// Auth
+import Login from "./pages/auth/Login";
+import Signup from "./pages/auth/Signup";
 
-import Login from "./pages/LoginPage";
+// Placeholders — we'll build these next
 import UserDashboard from "./pages/user/UserDashboard";
 import ProviderDashboard from "./pages/provider/ProviderDashboard";
-import Unauthorized from "./pages/Unauthorized";
-import LandingPage from "./pages/LandingPage";
-import SignUpPage from "./pages/SignUpPage";
-import LoadingState from "./components/LoadingState";
-import DashboardLayout from "./layouts/DashboardLayout.jsx";
+import UnauthorizedPage from "./pages/auth/Unauthorized";
+import LandingPage from "./pages/shared/LandingPage";
 
 const App = () => {
   return (
-    <BrowserRouter>
-      <Toaster position="top-center" />
+    <AuthProvider>
+      <AppProvider>
+        <BrowserRouter>
+          <Toaster
+            position="top-center"
+            reverseOrder={false}
+            gutter={12}
+            toastOptions={{
+              duration: 4000,
+              style: {
+                background: "#fff",
+                color: "#333",
+                borderRadius: "10px",
+                border: "1px solid #e5e7eb",
+                boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)",
+                fontSize: "14px",
+                fontWeight: "500",
+                padding: "16px",
+              },
+              success: {
+                style: {
+                  background: "#f0fdf4",
+                  color: "#166534",
+                  border: "1px solid #bbf7d0",
+                },
+                iconTheme: {
+                  primary: "#16a34a",
+                  secondary: "#f0fdf4",
+                },
+              },
+              error: {
+                style: {
+                  background: "#fef2f2",
+                  color: "#7f1d1d",
+                  border: "1px solid #fecaca",
+                },
+                iconTheme: {
+                  primary: "#dc2626",
+                  secondary: "#fef2f2",
+                },
+              },
+              loading: {
+                style: {
+                  background: "#eff6ff",
+                  color: "#1e40af",
+                  border: "1px solid #bfdbfe",
+                },
+                iconTheme: {
+                  primary: "#2563eb",
+                  secondary: "#eff6ff",
+                },
+              },
+            }}
+          />
+        <Routes>
+          {/* Public */}
+          <Route path="/" element={<LandingPage/>} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
 
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/loading" element={<LoadingState />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<SignUpPage />} />
-        <Route path="/unauthorized" element={<Unauthorized />} />
+          {/* User routes */}
+          <Route
+            path="/user/*"
+            element={
+              <ProtectedRoute role="USER">
+                <UserDashboard />
+              </ProtectedRoute>
+            }
+          />
 
-        {/* USER ROUTES */}
-        <Route element={<ProtectedRoute allowedRoles={["USER"]} />}>
-          <Route element={<DashboardLayout />}>
-            <Route path="/user/dashboard" element={<UserDashboard />} />
-            {/* <Route path="/user/requests" element={<MyRequests />} /> */}
-          </Route>
-        </Route>
+          {/* Provider routes */}
+          <Route
+            path="/provider/*"
+            element={
+              <ProtectedRoute role="PROVIDER">
+                <ProviderDashboard />
+              </ProtectedRoute>
+            }
+          />
 
-        {/* PROVIDER ROUTES */}
-        <Route element={<ProtectedRoute allowedRoles={["PROVIDER"]} />}>
-          <Route element={<DashboardLayout />}>
-            <Route path="/provider/dashboard" element={<ProviderDashboard />} />
-            {/* <Route path="/provider/jobs" element={<AvailableJobs />} /> */}
-          </Route>
-        </Route>
-
-
-        {/* FALLBACK */}
-        <Route path="*" element={<Navigate to="/login" />} />
-      </Routes>
-    </BrowserRouter>
+          <Route path="/unauthorized" element={<UnauthorizedPage />} />
+        </Routes>
+      </BrowserRouter>
+    </AppProvider>
+    </AuthProvider>
   );
 };
 

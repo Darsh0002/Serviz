@@ -1,58 +1,14 @@
-import axios from "axios";
-import React, { createContext, useEffect, useState } from "react";
+import { createContext } from "react";
+import { useAuth } from "./AuthContext";
 
-export const AppContext = createContext();
+export const AppContext = createContext({ baseURL: "", user: null });
 
-export const AppContextProvider = ({ children }) => {
-
-  const baseURL = import.meta.env.VITE_BASE_URL || "http://localhost:8080";
-
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  const fetchUser = async () => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      setUser(null);
-      setLoading(false);
-      return null;
-    }
-
-    try {
-      const res = await axios.get(`${baseURL}/api/u/profile`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      setUser(res.data);
-      return res.data;
-
-    } catch (err) {
-      console.error("User fetch failed", err);
-      localStorage.removeItem("token");
-      setUser(null);
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchUser();
-  }, []);
+export const AppProvider = ({ children }) => {
+  const { user } = useAuth();
+  const baseURL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_BASE_URL || "http://localhost:5000";
 
   return (
-    <AppContext.Provider
-      value={{
-        user,
-        setUser,
-        loading,
-        fetchUser,
-        baseURL,
-      }}
-    >
+    <AppContext.Provider value={{ baseURL, user }}>
       {children}
     </AppContext.Provider>
   );
